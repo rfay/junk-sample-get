@@ -19,6 +19,15 @@ pre_install_actions:
     version: {{ regexReplaceAll "^.*:" .services.db.type "" }}
     
   docroot: {{ dig "web" "locations" "/" "root" "notfound" .platformapp }}
+  {{ if eq .platformapp.build.flavor "composer" }}
+  hooks:
+    post-start:
+      - composer: install
+  {{ if .platformapp.hooks.deploy }}
+      - exec: "{{ trimAll "\n" .platformapp.hooks.deploy | splitList "\n" | join ` && ` }}"
+  {{ end }}
+  {{ end }}
+    
   EOF
   
 #type: {{ regexReplaceAll ":[^:]\*$" "" .services.db.type }}
